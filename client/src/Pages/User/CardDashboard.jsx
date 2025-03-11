@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 import axiosInstance from "../../axiosConfig";
 import Card from "../../components/User/DebitCard";
 
@@ -33,7 +32,7 @@ const CardDashboard = () => {
     return (
         <div className=" w-full min-h-screen  p-6">
             <h2 className="text-2xl font-semibold mb-4 text-center">My Cards</h2>
-            <div className="flex flex-cola gap-4 w-full">
+            <div className="flex flex-col gap-4 w-full">
                 {cards.length > 0 ? (
                     cards.map((card) => (
                         <div
@@ -42,12 +41,8 @@ const CardDashboard = () => {
                         >
                             <Card card={card} />
 
-                            <div
-                                className="bg-white/10 backdrop-blur-md  rounded-2xl p-5  border-gray-200 dark:border-gray-700 transition transform "
-                            >
-                                <h3 className="text-lg font-semibold text-gray-900 ">
-                                    {card.cardType} Card
-                                </h3>
+                            <div className="bg-white/10 backdrop-blur-md  rounded-2xl p-5  border-gray-200 dark:border-gray-700 transition transform ">
+                                <h3 className="text-lg font-semibold text-gray-900 ">{card.cardType} Card</h3>
                                 <p className="text-sm text-gray-600 dark:text-gray-400">
                                     •••• •••• •••• {card.cardNumber.slice(-4)}
                                 </p>

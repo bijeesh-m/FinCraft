@@ -5,7 +5,7 @@ import Signup from "./Pages/Signup";
 import Forget from "./Pages/Forget";
 import Loan from "./Pages/Loan";
 import Insurance from "./Pages/Insurance";
-import Cards from "./Pages/Cards";
+import Cards from "./Pages/User/Cards";
 import Deposits from "./Pages/Deposits";
 import Home from "./Pages/User/Home";
 import HomeLayout from "./layouts/HomeLayout";
@@ -19,29 +19,21 @@ import LifeInsurance from "./Pages/User/LifeInsure";
 import GeneralInsurance from "./Pages/GeneralInsur";
 import DebitCards from "./Pages/DebitCards";
 import CreditCards from "./Pages/CreditCard";
-
 import PaymentTransfer from "./Pages/PaymentTransfer";
 import BillPayment from "./Pages/BillPayment";
 import TaxPayment from "./Pages/TaxPayment";
 import LoanRequest from "./Pages/LoanRequest";
-import PrsnllnReq from "./Pages/PrsnllnReq";
-import CarlnReq from "./Pages/CarlnReq";
-import EdulnReq from "./Pages/EdulnReq";
-import GoldlnReq from "./Pages/GoldlnReq";
-// import HouselnReq from "./Pages/HouselnReq";
 import DepositReq from "./Pages/DepositReq";
 import ManagerDash from "./Pages/Manager/ManagerDash";
 import Requests from "./Pages/Manager/Requests";
 import CardApplication from "./Pages/User/CardReq";
 import AdminDash from "./Pages/Admin/AdminDash";
-import StaffDash from "./Pages/Staffdash";
 import RequestsPage from "./Pages/Manager/AccRequests";
 import AboutUs from "./Pages/AboutUs";
-import ComplaintPage from "./Pages/Complaint";
+import ComplaintPage from "./Pages/User/Complaint";
 import FeedbackPage from "./Pages/FeedBack";
 import AccountDashboard from "./Pages/User/AccountDashboard";
 import ViewUsers from "./Pages/Admin/ViewUsers";
-import LoanRequestsPage from "./Pages/LoanRequestsPage";
 import { ToastContainer } from "react-toastify";
 import AccountRequestForm from "./components/User/AccountRequestForm";
 import ScrollToTop from "./components/scrolltotop/ScrollToTop";
@@ -62,6 +54,8 @@ import LoanDashboard from "./Pages/User/LoanDashboard";
 import CardRequests from "./Pages/Manager/CardRequests";
 import CardDashboard from "./Pages/User/CardDashboard";
 import Profile from "./Pages/User/Profile";
+import BankTransfer from "./Pages/User/BankTransfer";
+import ManagerProfile from "./Pages/Manager/ManagerProfile";
 
 function App() {
     return (
@@ -69,8 +63,9 @@ function App() {
             <ToastContainer />
             <ScrollToTop />
             <Routes>
-                Pages with header and footer add here
+                {/* Pages with header and footer add here */}
                 <Route path="/" element={<HomeLayout />}>
+                    <Route path="/" element={<Home />} />
                     <Route element={<ProtectedRoutes />}>
                         <Route path="/bankaccntdash" element={<AccountDashboard />} />
                         <Route path="/complaint" element={<ComplaintPage />} />
@@ -85,28 +80,26 @@ function App() {
                         <Route path="/insurance-dashboard" element={<InsuranceDashboard />} />
                         <Route path="/loan-dashboard" element={<LoanDashboard />} />
                         <Route path="/card-dashboard" element={<CardDashboard />} />
+                        <Route path="/aboutus" element={<AboutUs />} />
+                        <Route path="/personalloan" element={<PrsnlLoan />} />
+                        <Route path="/goldloan" element={<GoldLoan />} />
+                        <Route path="/carloan" element={<CarLoan />} />
+                        <Route path="/houseloan" element={<HouseLoan />} />
+                        <Route path="/educationloan" element={<EducationLoan />} />
+                        <Route path="/healthInsurance" element={<HealthInsurance />} />
+                        <Route path="/lifeInsurance" element={<LifeInsurance />} />
+                        <Route path="/generalInsurance" element={<GeneralInsurance />} />
+                        <Route path="/debitcard" element={<DebitCards />} />
+                        <Route path="/creditcard" element={<CreditCards />} />
+                        <Route path="/billpayment" element={<BillPayment />} />
+                        <Route path="/taxpayment" element={<TaxPayment />} />
+                        <Route path="/loanreq" element={<LoanRequest />} />
+                        <Route path="/insurancereq" element={<InsuranceApplicationForm />} />
+                        <Route path="/cardrequest" element={<CardApplication />} />
+                        <Route path="/depositreq" element={<DepositReq />} />
+                        <Route path="/pay-loan" element={<LoanRepayment />} />
+                        <Route path="/transfer" element={<BankTransfer />} />
                     </Route>
-                    <Route path="/" element={<Home />} />
-                    {/* <Route path="/staffdash" element={<StaffDash />} />  */}
-                    <Route path="/aboutus" element={<AboutUs />} />
-                    <Route path="/personalloan" element={<PrsnlLoan />} />
-                    <Route path="/goldloan" element={<GoldLoan />} />
-                    <Route path="/carloan" element={<CarLoan />} />
-                    <Route path="/houseloan" element={<HouseLoan />} />
-                    <Route path="/educationloan" element={<EducationLoan />} />
-                    <Route path="/healthInsurance" element={<HealthInsurance />} />
-                    <Route path="/lifeInsurance" element={<LifeInsurance />} />
-                    <Route path="/generalInsurance" element={<GeneralInsurance />} />
-                    <Route path="/debitcard" element={<DebitCards />} />
-                    <Route path="/creditcard" element={<CreditCards />} />
-                    <Route path="/billpayment" element={<BillPayment />} />
-                    <Route path="/taxpayment" element={<TaxPayment />} />
-                    <Route path="/loanreq" element={<LoanRequest />} />
-                    <Route path="/insurancereq" element={<InsuranceApplicationForm />} />
-                    <Route path="/cardrequest" element={<CardApplication />} />
-                    <Route path="/loanrequests" element={<LoanRequestsPage />} />
-                    <Route path="/depositreq" element={<DepositReq />} />
-                    <Route path="/pay-loan" element={<LoanRepayment />} />
                 </Route>
                 {/* Admin */}
                 <Route path="/admin" element={<AdminLogin />} />
@@ -121,6 +114,7 @@ function App() {
                 <Route path="/manager" element={<ManagerLayout />}>
                     <Route index element={<ManagerDash />} />
                     <Route path="/manager/bankaccountrequests" element={<RequestsPage />} />
+                    <Route path="/manager/profile" element={<ManagerProfile />} />
                     <Route path="/manager/requests" element={<Requests />} />
                     <Route path="/manager/loan-requests" element={<LoanRequests />} />
                     <Route path="/manager/insurance-requests" element={<InsuranceRequests />} />

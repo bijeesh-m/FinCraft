@@ -82,7 +82,7 @@ function PaymentTransfer() {
         </Link>
 
         {/* Bank Transfer Card */}
-        <Link to="/banktransfer" className="text-black">
+        <Link to="/transfer" className="text-black">
           <div className="border w-64 h-80 flex flex-col items-center justify-center p-4 rounded-md hover:shadow-lg transition-shadow">
             <img
               src={bankTransferImg}

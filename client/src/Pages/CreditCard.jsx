@@ -68,18 +68,7 @@ function CreditCards() {
       </div>
 
       <div className="flex justify-center mt-8">
-        <Link to="/paybills" className="mr-5">
-          <div className="border w-64 h-80 flex flex-col items-center justify-center p-4 rounded-md hover:shadow-lg transition-shadow">
-            <img
-              src={payBillsImage}
-              alt="Pay Credit Bills"
-              className="w-32 h-32 rounded-full transition-transform transform hover:scale-105"
-            />
-            <h2 className="mt-2 mb-4 text-center text-lg font-semibold">
-              Pay Credit Bills
-            </h2>
-          </div>
-        </Link>
+        
         <Link to="/cardrequest">
           <div className="border w-64 h-80 flex flex-col items-center justify-center p-4 rounded-md hover:shadow-lg transition-shadow">
             <img

@@ -8,7 +8,7 @@ import cardRequestImg from "../../Images/Cards/debit.jpg";
 
 function Requests() {
   return (
-    <div>
+    <div className=" py-5">
       <h2 className="text-center text-xl font-bold mb-4">Requests</h2>
 
       {/* Flex container with responsive behavior */}

@@ -1,10 +1,10 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-import CardsBg from "../Images/Cards/crd.gif";
-import debit from "../Images/Cards/debit.jpg";
-import credit from "../Images/Cards/credit.jpg";
-import drcrLogo from "../Images/Cards/debit-credit.jpg";
+import CardsBg from "../../Images/Cards/crd.gif";
+import debit from "../../Images/Cards/debit.jpg";
+import credit from "../../Images/Cards/credit.jpg";
+import drcrLogo from "../../Images/Cards/debit-credit.jpg";
 
 function Cards() {
     return (

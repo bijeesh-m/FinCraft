@@ -1,13 +1,9 @@
-const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
-const { v4: uuidv4 } = require("uuid");
 const userModel = require("../Models/userModel");
 const bnkAccntModel = require("../Models/bankAccModel");
 const LoanReqModel = require("../Models/loanModel");
 const transactionModel = require("../Models/transactionModle");
-const BillPModel = require("../Models/billPaymentModel");
-const TaxPModel = require("../Models/taxPaymentModel");
-const LoanPModel = require("../Models/loanPaymentModel");
+
 const cardReqModel = require("../Models/cardReqModel");
 const InsuranceRequestModel = require("../Models/insureReqModel");
 const complaintModel = require("../Models/complaintsModel");
@@ -34,13 +30,14 @@ module.exports.Register = async (req, res) => {
     }
 };
 module.exports.Login = async (req, res) => {
-    console.log(req.body);
-
     try {
         const isExist = await userModel.findOne({ email: req.body.email });
         if (isExist) {
             const isMatch = await bcrypt.compare(req.body.password, isExist.password);
             if (isMatch) {
+                if (isExist.isBlocked) {
+                    return res.status(400).json({ message: "Your account is blocked!" });
+                }
                 const token = jwt.sign(
                     { username: isExist.username, role: isExist.role, id: isExist._id },
                     process.env.SEC_KEY,
@@ -100,17 +97,20 @@ module.exports.Profile = async (req, res) => {
 
 module.exports.EditProfile = async (req, res) => {
     try {
-        console.log("asdkfjl");
-        // const updatedUser = await userModel.findByIdAndUpdate(req.user.id, req.body, {
-        //     new: true,
-        //     runValidators: true,
-        // });
+        console.log(req.file);
+        const updatedUser = await userModel.findByIdAndUpdate(
+            req.user.id,
+            { ...req.body, avatar: `/uploads/${req.file.filename}` },
+            {
+                new: true,
+            }
+        );
 
-        // if (!updatedUser) {
-        //     return res.status(404).json({ message: "User not found" });
-        // }
+        if (!updatedUser) {
+            return res.status(404).json({ message: "User not found" });
+        }
 
-        // res.status(200).json({ message: "Profile Updated", user: updatedUser });
+        res.status(200).json({ message: "Profile Updated", user: updatedUser });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Internal Server Error" });
@@ -122,6 +122,8 @@ module.exports.ChangePassword = async (req, res) => {
     try {
         const { oldPassword, newPassword } = req.body;
 
+        console.log(oldPassword, newPassword);
+
         const user = await userModel.findById(req.user.id);
         if (!user) {
             return res.status(404).json({ message: "User not found" });
@@ -132,9 +134,7 @@ module.exports.ChangePassword = async (req, res) => {
             return res.status(400).json({ message: "Incorrect old password" });
         }
 
-        const hashedNewPassword = await bcrypt.hash(newPassword, 10);
-
-        user.password = hashedNewPassword;
+        user.password = newPassword;
         await user.save();
 
         res.status(200).json({ message: "Password updated successfully" });
@@ -143,6 +143,7 @@ module.exports.ChangePassword = async (req, res) => {
         res.status(500).json({ message: "Internal Server Error" });
     }
 };
+
 module.exports.SendComplaints = async (req, res) => {
     console.log(req.body);
 
@@ -166,6 +167,7 @@ module.exports.SendComplaints = async (req, res) => {
         });
     }
 };
+
 module.exports.SendFeedbacks = async (req, res) => {
     try {
         const { name, email, feedback } = req.body;
@@ -183,6 +185,7 @@ module.exports.SendFeedbacks = async (req, res) => {
             data: newfeedback,
         });
     } catch (err) {
+        console.log(err);
         res.status(400).json({
             status: "error",
             message: "Error submitting feedback",
@@ -219,6 +222,7 @@ module.exports.BankAccReg = async (req, res) => {
         return res.status(503).json({ message: "Something Went Wrong", error: error.message });
     }
 };
+
 module.exports.getAccount = async (req, res) => {
     const userId = req.user.id;
 
@@ -269,54 +273,118 @@ module.exports.BankAccVerify = async (req, res) => {
 };
 
 module.exports.BillPayment = async (req, res) => {
-    // console.log(req.user);
-
     try {
-        const { billername, billercategory, accountnumber, amount } = req.body;
+        const { billername, billcategory, paymentMethod, accountnumber, cardNumber, cvv, expiryDate, amount } =
+            req.body;
 
-        const ishaveAccount = await bnkAccntModel.findOne({ accountnumber });
-        if (!ishaveAccount) {
-            return res.status(404).json({ message: "Biller doesn't have an account" });
+        console.log(req.body);
+
+        if (paymentMethod === "bank") {
+            const bankAccount = await bnkAccntModel.findOne({ accountnumber });
+
+            if (!bankAccount) {
+                return res.status(404).json({ message: "Bank account not found" });
+            }
+
+            if (bankAccount.balance < amount) {
+                return res.status(400).json({ message: "Insufficient balance" });
+            }
+
+            bankAccount.balance -= Number(amount);
+            await bankAccount.save();
+        } else if (paymentMethod === "card") {
+            const card = await cardModel.findOne({ cardNumber, cvv, expiryDate, status: "Active" });
+
+            if (!card) {
+                return res.status(404).json({ message: "Invalid or inactive credit card" });
+            }
+
+            if (card.availableCredit < amount) {
+                return res.status(400).json({ message: "Insufficient credit limit" });
+            }
+
+            card.availableCredit -= Number(amount);
+            await card.save();
+        } else {
+            return res.status(400).json({ message: "Invalid payment method" });
         }
 
-        const newPayment = new BillPModel({
-            userid: req.user.id,
-            billername,
-            billercategory,
-            accountnumber,
-            amount,
-            paymentstatus: "Completed",
-            transactionid: uuidv4(),
+        const transaction = new transactionModel({
+            userId: req.user.id,
+            transactionType: "Bill",
+            transactionDescription: `Bill payment for ${billername}(${billcategory})`,
+            transactionAmount: Number(amount),
+            transactionStatus: "Debited",
         });
 
-        await newPayment.save();
+        await transaction.save();
 
-        res.status(200).json({ message: "Bill Payment Success", newPayment });
+        res.status(200).json({ message: "Bill Payment Success", transaction });
     } catch (error) {
-        console.error("Error creating bill payment:", error);
-        res.status(500).json({ error: "Failed to create bill payment." });
+        console.error("Error processing bill payment:", error);
+        res.status(500).json({ error: "Failed to process bill payment" });
     }
 };
 
 module.exports.TaxPayment = async (req, res) => {
     try {
-        const { taxtype, taxamount, taxperiod } = req.body;
+        const { taxtype, taxamount, taxPeriodType, taxperiod, paymentMethod } = req.body;
+        console.log(req.body);
 
-        const newTaxPayment = new TaxPModel({
-            userid: req.user.id,
-            taxtype,
-            taxamount,
-            taxperiod,
-            paymentstatus: "Completed",
-            transactionId: uuidv4(),
+        if (!taxtype || !taxamount || !taxPeriodType || !taxperiod || !paymentMethod) {
+            return res.status(400).json({ message: "All fields are required" });
+        }
+
+        const userId = req.user?.id; // Get user ID from auth or request body
+        if (!userId) return res.status(400).json({ message: "User ID is required" });
+
+        let paymentStatus = "Pending";
+        let transactionStatus = "Debited";
+        let bankId = null;
+
+        if (paymentMethod === "bank") {
+            const bankAccount = await bnkAccntModel.findOne({ user: userId }); // Get user's bank account
+            if (!bankAccount) return res.status(404).json({ message: "Bank account not found" });
+
+            if (bankAccount.balance < taxamount) {
+                return res.status(400).json({ message: "Insufficient balance" });
+            }
+
+            // Deduct amount
+            bankAccount.balance -= Number(taxamount);
+            await bankAccount.save();
+            paymentStatus = "Completed";
+            bankId = bankAccount._id;
+        } else if (paymentMethod === "creditCard") {
+            const card = await cardModel.findOne({ customerId: userId, cardType: "Credit" }); // Get user's credit card
+            if (!card) return res.status(404).json({ message: "Card not found" });
+
+            if (card.availableCredit < taxamount) {
+                return res.status(400).json({ message: "Insufficient credit limit" });
+            }
+
+            // Deduct credit
+            card.availableCredit -= Number(taxamount);
+            await card.save();
+            paymentStatus = "Completed";
+        }
+
+        // Create transaction record
+        const transaction = new transactionModel({
+            userId,
+            bankId,
+            transactionType: "Tax",
+            transactionDescription: `Tax payment for ${taxtype} (${taxPeriodType} - ${taxperiod})`,
+            transactionAmount: Number(taxamount),
+            transactionStatus,
         });
 
-        await newTaxPayment.save();
+        await transaction.save();
 
-        res.status(200).json({ message: "Tax Payment Success", newTaxPayment });
+        res.status(200).json({ message: "Tax payment successful", transaction });
     } catch (error) {
-        console.error("Error creating tax payment:", error);
-        res.status(500).json({ error: "Failed to create tax payment." });
+        console.log(error);
+        res.status(500).json({ message: "Server Error", error });
     }
 };
 
@@ -368,6 +436,25 @@ module.exports.cardsStatus = async (req, res) => {
     try {
         const cards = await cardModel.find({ customerId: req.user.id }).populate("customerId");
         res.status(200).json({ message: "fetched Success", cards });
+    } catch (error) {
+        console.error("Error fetching card detaile:", error.message);
+        res.status(500).json({ error: "Failed to submit fetch card request." });
+    }
+};
+module.exports.cardsStatus = async (req, res) => {
+    try {
+        const cards = await cardModel.find({ customerId: req.user.id }).populate("customerId");
+        res.status(200).json({ message: "fetched Success", cards });
+    } catch (error) {
+        console.error("Error fetching card detaile:", error.message);
+        res.status(500).json({ error: "Failed to submit fetch card request." });
+    }
+};
+
+module.exports.creditCard = async (req, res) => {
+    try {
+        const card = await cardModel.findOne({ customerId: req.user.id, cardType: "Credit" }).populate("customerId");
+        res.status(200).json({ message: "fetched Success", card });
     } catch (error) {
         console.error("Error fetching card detaile:", error.message);
         res.status(500).json({ error: "Failed to submit fetch card request." });
@@ -505,14 +592,6 @@ module.exports.processLoanRequest = async (req, res) => {
             });
         }
 
-        // Extract documents from req.files
-        // const documents = Object.entries(req.files).flatMap(([fieldName, files]) =>
-        //     files.map((file) => ({
-        //         docType: fieldName, // Use the field name as the document type
-        //         filePath: file.path,
-        //     }))
-        // );
-
         let documents = [];
 
         for (const file of req.files) {
@@ -613,5 +692,72 @@ module.exports.transactions = async (req, res) => {
         res.status(200).json({ message: "Transactions fetched successfully", transactions });
     } catch (error) {
         res.status(500).json({ message: error.message });
+    }
+};
+
+/////////////////////////////////// Bank transfer /////////////////////////////////
+
+module.exports.bankTransfer = async (req, res) => {
+    const { senderAccount, receiverAccount, amount, description } = req.body;
+
+    if (!senderAccount || !receiverAccount || !amount || amount <= 0) {
+        return res.status(400).json({ message: "Invalid transfer details" });
+    }
+
+    try {
+        // Fetch sender and receiver accounts
+        const sender = await bnkAccntModel.findOne({ accountnumber: senderAccount, user: req.user.id });
+
+        if (!sender) {
+            return res.status(403).json({ message: "failed: Sender account does not belong to you." });
+        }
+        const receiver = await bnkAccntModel.findOne({ accountnumber: receiverAccount });
+
+        if (!sender || !receiver) {
+            return res.status(404).json({ message: "Account not found" });
+        }
+
+        if (sender.balance < amount) {
+            return res.status(400).json({ message: "Insufficient balance" });
+        }
+
+        // Deduct from sender
+        sender.balance -= amount;
+        await sender.save();
+
+        // Credit to receiver
+        receiver.balance += amount;
+        await receiver.save();
+
+        // Create transaction records
+        const debitTransaction = new transactionModel({
+            userId: sender.user,
+            bankId: sender._id,
+            transactionType: "Bank transfer",
+            transactionDescription: description || `Transfer to ${receiverAccount}`,
+            transactionAmount: amount,
+            transactionStatus: "Debited",
+        });
+
+        const creditTransaction = new transactionModel({
+            userId: receiver.user,
+            bankId: receiver._id,
+            transactionType: "Bank transfer",
+            transactionDescription: description || `Transfer from ${senderAccount}`,
+            transactionAmount: amount,
+            transactionStatus: "Credited",
+        });
+
+        await debitTransaction.save();
+        await creditTransaction.save();
+
+        return res.status(200).json({
+            message: "Transfer successful",
+            senderBalance: sender.balance,
+            receiverBalance: receiver.balance,
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "Transaction failed", error: error.message });
     }
 };

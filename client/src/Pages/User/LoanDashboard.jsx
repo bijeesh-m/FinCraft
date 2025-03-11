@@ -25,7 +25,7 @@ const LoanDashboard = () => {
     }, []);
 
     return (
-        <div className="container mx-auto p-6">
+        <div className="container mx-auto p-6 min-h-screen">
             <h2 className="text-2xl md:text-3xl font-bold mb-6 text-center text-gray-800">
                 Your Loan Dashboard
             </h2>

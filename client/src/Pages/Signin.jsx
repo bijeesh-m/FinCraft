@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import axios from "../axiosConfig";
 
 import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 function Signin() {
     const {
@@ -24,8 +25,6 @@ function Signin() {
                 // Redirect based on role
                 if (role === "manager") {
                     navigate("/manager");
-                } else if (role === "staff") {
-                    navigate("/staffdash");
                 } else if (role === "user") {
                     navigate("/");
                 } else {
@@ -34,7 +33,7 @@ function Signin() {
             }
         } catch (error) {
             console.error("Login error:", error);
-            alert("Failed to login.");
+            toast.error(error.response?.data?.message);
         }
     };
 

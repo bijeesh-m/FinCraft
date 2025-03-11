@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie"; // Import the cookies library
+import axiosInstance from "../axiosConfig";
 
 function ChangePassword() {
   const {
@@ -33,7 +33,7 @@ function ChangePassword() {
       console.log("Sending data:", data); // Log the request data
       console.log("Using token:", token); // Log the token
 
-      const response = await axios.put("/User/changePassword", data, {
+      const response = await axiosInstance.put("/User/changePassword", data, {
         headers: {
           Authorization: `Bearer ${token}`, // Use the token from cookies
         },

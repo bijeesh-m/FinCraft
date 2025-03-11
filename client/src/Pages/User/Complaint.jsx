@@ -1,8 +1,14 @@
 import React from "react";
 import { useForm } from "react-hook-form";
-import axios from "../axiosConfig";
+import axios from "../../axiosConfig";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 const ComplaintPage = () => {
+
+
+  const navigate = useNavigate()
+
   const {
     register,
     handleSubmit,
@@ -21,9 +27,10 @@ const ComplaintPage = () => {
 
       // Check if the response contains a status key and its value
       if (response.data?.status === "pending") {
-        alert("Complaint submitted successfully. Status: Pending");
+        toast("Complaint submitted successfully. Status: Pending");
+        navigate('/')
       } else {
-        alert("Failed to submit complaint. Please try aagain.");
+        toast("Failed to submit complaint. Please try aagain.");
       }
 
       // Reset the form

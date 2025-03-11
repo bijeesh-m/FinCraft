@@ -7,6 +7,7 @@ const UserBankAccountDashboard = () => {
     const [loanStatus, setLoanStatus] = useState([]);
     const [transactions, setTransactions] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [creditCard, setCreditCard] = useState({});
     const navigate = useNavigate(); // Initialize navigate hook
 
     useEffect(() => {
@@ -24,6 +25,11 @@ const UserBankAccountDashboard = () => {
                 setLoanStatus(loanResponse.data);
 
                 // Fetch loan status
+                const creditCard = await axios.get("/User/credit-card");
+                console.log(creditCard);
+                setCreditCard(creditCard.data.card);
+
+                // Fetch transaction status
                 const transactions = await axios.get("/User/transactions");
                 setTransactions(transactions.data.transactions);
             } catch (error) {
@@ -77,7 +83,7 @@ const UserBankAccountDashboard = () => {
                 </div>
 
                 {/* User Details */}
-                <div className="bg-gradient-to-br from-slate-100 to-slate-200 p-6 rounded ring-2 ring-gray-500">
+                <div className="bg-white p-6 rounded ">
                     <h2 className="text-lg font-semibold text-gray-700 mb-4">Account Details</h2>
                     {userAccount ? (
                         userAccount.status === "rejected" ? (
@@ -133,15 +139,17 @@ const UserBankAccountDashboard = () => {
                 {/* Account Overview - Only shown if status is not rejected */}
                 {userAccount?.status !== "rejected" && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="bg-white ring-2 ring-green-800 p-6 rounded shadow-md">
+                        <div className="bg-white  p-6 rounded shadow-md">
                             <h2 className="text-lg font-semibold text-gray-700">Current Balance</h2>
                             <p className="text-3xl font-bold text-green-600 mt-2">
                                 ₹{userAccount?.balance.toLocaleString() || 0}
                             </p>
                         </div>
-                        <div className="bg-white p-6 ring-2 ring-blue-800 rounded shadow-md">
+                        <div className="bg-white p-6  rounded shadow-md">
                             <h2 className="text-lg font-semibold text-gray-700">Credit Card</h2>
-                            <p className="text-3xl font-bold text-red-600 mt-2">₹1,234.56</p>
+                            <p className="text-3xl font-bold text-red-600 mt-2">
+                                ₹{creditCard.availableCredit?.toLocaleString()}
+                            </p>
                         </div>
                     </div>
                 )}
@@ -149,9 +157,13 @@ const UserBankAccountDashboard = () => {
                 {/* Loan Status - Only shown if status is not rejected */}
                 {userAccount?.status !== "rejected" && loanStatus.length > 0 && (
                     <div className="bg-white p-6 rounded-lg shadow-md">
-                        <h2 className="text-lg font-semibold text-gray-700 mb-4">Loan Details</h2>
+                        <h2 className="text-xl font-bold text-gray-700 mb-4">Loan Details</h2>
                         {loanStatus.map((loan, index) => (
-                            <div key={index} className="border-b py-2">
+                            <div
+                                onClick={() => navigate("/loan-dashboard")}
+                                key={index}
+                                className="border-b  p-5 bg-fuchsia-50 my-2 rounded-lg"
+                            >
                                 <p>
                                     <strong>Loan Type:</strong> {loan.loanType}
                                 </p>
@@ -172,26 +184,6 @@ const UserBankAccountDashboard = () => {
                                         {loan.status}
                                     </span>
                                 </p>
-                                {loan.transactions && loan.transactions.length > 0 ? (
-                                    <div className="mt-4">
-                                        <h3 className=" font-semibold text-gray-700 italic">Payment Details</h3>
-                                        {loan.transactions.map((transaction, i) => (
-                                            <div key={i} className="border-t py-2">
-                                                <p>
-                                                    <strong>Date:</strong>{" "}
-                                                    {new Date(transaction.transactionDate).toLocaleDateString()}
-                                                </p>
-                                                <p>
-                                                    <strong>Amount Paid:</strong> ₹
-                                                    {transaction.transactionAmount.toLocaleString()}
-                                                </p>
-                                                <p>{/* <strong>Payment Method:</strong> {payment.method} */}</p>
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <p className="text-sm text-gray-500">No payments made yet.</p>
-                                )}
                             </div>
                         ))}
                     </div>
@@ -199,7 +191,7 @@ const UserBankAccountDashboard = () => {
 
                 {/* Recent Transactions - Only shown if status is not rejected */}
                 {userAccount?.status !== "rejected" && (
-                    <div className="bg-white p-6 rounded-lg shadow-md">
+                    <div className="bg-white p-6 rounded-lg shadow-md max-h-screen overflow-y-auto">
                         <h2 className="text-lg font-semibold text-gray-700 mb-4">Recent Transactions</h2>
                         <div className="overflow-x-auto">
                             <table className="min-w-full text-left">

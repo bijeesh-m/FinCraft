@@ -92,7 +92,7 @@ function Profile() {
                 {/* Profile Header */}
                 <div className="flex flex-col md:flex-row  items-center    space-y-4 md:space-y-0 md:space-x-6 border-b pb-6">
                     <img
-                        src={user.avatar || userIcon}
+                        src={`http://localhost:4000${user.avatar || userIcon} `}
                         alt="Profile"
                         className="w-24 h-24 md:w-32 md:h-32 bg-cover bg-center  rounded-full  border-4 border-gray-100"
                     />

@@ -33,7 +33,7 @@ const CardRequests = () => {
     };
 
     return (
-        <div className="container mx-auto p-4">
+        <div className="container mx-auto p-4 min-h-screen">
             <h2 className="text-2xl font-bold text-center mb-4">Card Approvals</h2>
 
             <div className="overflow-x-auto">

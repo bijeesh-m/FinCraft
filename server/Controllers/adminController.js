@@ -153,3 +153,70 @@ module.exports.AddManagers = async (req, res) => {
         });
     }
 };
+
+module.exports.handleComplaints = async (req, res) => {
+    try {
+        const { id } = req.params; // Complaint ID from URL
+        const { status } = req.body; // New status from request body
+
+        // Find complaint by ID and update status
+        const updatedComplaint = await complaintModel.findByIdAndUpdate(id, { status }, { new: true });
+
+        if (!updatedComplaint) {
+            return res.status(404).json({ message: "Complaint not found" });
+        }
+
+        res.status(200).json({ message: "Complaint status updated", complaint: updatedComplaint });
+    } catch (error) {
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+};
+
+module.exports.handleFeedback = async (req, res) => {
+    try {
+        const { id } = req.params; // Feedback ID from URL
+
+        // Find feedback by ID and update acknowledgment status
+        const updatedFeedback = await feedbackModel.findByIdAndUpdate(
+            id,
+            { isAcknowledge: true },
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedFeedback) {
+            return res.status(404).json({ message: "Feedback not found" });
+        }
+
+        res.status(200).json({ message: "Feedback acknowledged", feedback: updatedFeedback });
+    } catch (error) {
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+};
+module.exports.blockUnblock = async (req, res) => {
+    console.log("block");
+    try {
+        const { id } = req.params;
+        const user = await userModel.findById(id);
+        if (!user) return res.status(404).json({ message: "User not found" });
+
+        user.isBlocked = !user.isBlocked; // Toggle block status
+        await user.save();
+
+        res.json({ message: `User ${user.isBlocked ? "blocked" : "unblocked"} successfully` });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Server error", error });
+    }
+};
+
+module.exports.deleteUser = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const user = await userModel.findByIdAndDelete(id);
+        if (!user) return res.status(404).json({ message: "User not found" });
+
+        res.json({ message: "User deleted successfully" });
+    } catch (error) {
+        res.status(500).json({ message: "Server error", error });
+    }
+};

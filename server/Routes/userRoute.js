@@ -15,11 +15,17 @@ router.post("/BankAccReg", verifyToken, checkRole(["user"]), userController.Bank
 router.get("/GetBankAcc", verifyToken, checkRole(["user"]), userController.getAccount);
 router.get("/BankAccRequets", userController.BankAccRequets);
 router.get("/BankAccVerify", verifyToken, checkRole(["user"]), userController.BankAccVerify);
+
+router.post("/transfer", verifyToken, checkRole(["user"]), userController.bankTransfer);
+
+
+
 router.post("/BillPayment", verifyToken, checkRole(["user"]), userController.BillPayment);
 router.post("/TaxPayment", verifyToken, checkRole(["user"]), userController.TaxPayment);
 
 router.post("/CardRequest", verifyToken, checkRole(["user"]), uploads.any("documents"), userController.cardRequest);
 router.get("/cards", verifyToken, checkRole(["user"]), userController.cardsStatus);
+router.get("/credit-card", verifyToken, checkRole(["user"]), userController.creditCard);
 router.patch("/cards/:id", verifyToken, checkRole(["user"]), userController.updateCardStatus);
 
 router.post(

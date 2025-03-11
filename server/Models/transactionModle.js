@@ -13,7 +13,6 @@ const transactionModel = new mongoose.Schema({
     bankId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "bankaccount",
-        required: true,
     },
     transactionType: {
         type: String,

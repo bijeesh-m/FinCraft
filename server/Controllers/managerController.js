@@ -5,6 +5,7 @@ const transactionModel = require("../Models/transactionModle");
 const InsuranceRequest = require("../Models/insureReqModel");
 const cardModel = require("../Models/cardModel");
 const cardRequestModel = require("../Models/cardReqModel");
+const Manager = require("../Models/managerModel");
 
 module.exports.updateAccountStatus = async (req, res) => {
     const { id } = req.params;
@@ -166,7 +167,6 @@ module.exports.updateCardStatus = async (req, res) => {
                     expiryDate: "12/28",
                     cardType: request.cardType,
                     status: "Inactive",
-                   
                 };
             }
 
@@ -186,3 +186,16 @@ module.exports.updateCardStatus = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+
+module.exports.getUser = async (req, res) => {
+    try {
+        const user = await Manager.findOne({ userId: req.user.id });
+        console.log(user);
+        res.status(200).json({ message: "success", user });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "failed", error: error.message });
+    }
+};
+
+

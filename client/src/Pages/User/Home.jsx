@@ -13,6 +13,7 @@ import cards from "../../Images/cards.jpg";
 import depowdrw from "../../Images/depowidrw.jpg";
 import payment from "../../Images/payment.jpg";
 import backgroundImage from "../../Images/BGGif2.gif";
+import { toast } from "react-toastify";
 
 const carouselImages = [image1, image2, image3];
 
@@ -97,7 +98,7 @@ const Home = () => {
                             <img src={cards} className="block mx-auto w-60 h-60 mt-6" alt="Cards" />
                             <h4 className="text-center text-black">Cards</h4>
                         </Link>
-                        <Link to="/deposits">
+                        <Link onClick={() => toast.warning("This feature is not yet implemented!")}>
                             <img src={depowdrw} className="block mx-auto w-60 h-60 mt-6" alt="Deposits" />
                             <h4 className="text-center text-black">Deposits / withdrawal</h4>
                         </Link>

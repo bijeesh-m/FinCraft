@@ -42,7 +42,7 @@ function AdminDash() {
         />
         <div className="absolute inset-0 bg-black opacity-10" />
 
-        <div className="container mx-auto mt-10 relative z-10">
+        <div className="container mx-auto pt-10 relative z-10">
           <h2 className="text-center">Unity Point Bank</h2>
           <p className="text-center">Your Trusted Banking Partner</p>
 

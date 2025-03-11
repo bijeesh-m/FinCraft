@@ -27,6 +27,7 @@ const userSchema = new mongoose.Schema({
     address: {
         type: String,
     },
+    isBlocked: { type: Boolean, default: false }, // Added field
 });
 
 userSchema.pre("save", async function (next) {
